@@ -1,0 +1,234 @@
+<html>
+
+<canvas id="gameCanvas" width="800" height="600"  ></canvas>
+
+
+
+
+<script>
+<!-- dimensions of display -->
+var canvas;    
+<!-- graphical information   -->
+var canvasContext;
+var ballx = 50;
+var bally = 50;
+var ballSpeedX = 10;
+var ballSpeedY = 5;
+
+var paddle1Y = 250;
+var paddle2Y = 250;
+var winScreen = false;
+
+var Pscore1 = 0;
+var Pscore2 = 0;
+const PADDLE_THIKNESS = 20;
+const PADDLE_HEIGHT = 100;
+const WIN_CONDITION = 3;
+
+function mouse(evt)
+{
+var rect = canvas.getBoundingClientRect();
+var root = document.documentElement;
+var mouseX = evt.clientX - rect.left - root.scrollLeft;
+var mouseY = evt.clientY - rect.top - root.scrollTop;
+return{
+	x:mouseX,
+	y:mouseY
+
+};
+
+}
+
+function ballReset()
+{
+if(Pscore1 >= WIN_CONDITION || Pscore2 >= WIN_CONDITION)
+{
+Pscore1 = 0;
+Pscore2 = 0;
+winScreen = true;
+}
+
+
+ballSpeedX = -ballSpeedX;
+ballx = canvas.height/2;
+bally = canvas.width/2;
+
+}
+
+function handleMouseClick(evt)
+{
+if(winScreen)
+{
+Pscore1 = Pscore2 = 0;
+winScreen = false;
+}
+
+}
+
+window.onload = function(){
+<!-- order matters -->
+
+canvas = document.getElementById("gameCanvas");
+canvasContext = canvas.getContext("2d");
+canvasContext.fillStyle = "black";
+canvasContext.fillRect(0,0,canvas.width,canvas.height);
+var frames = 50;
+setInterval(main, 1000/frames);
+
+canvas.addEventListener("mousedown", handleMouseClick);
+
+
+canvas.addEventListener("mousemove", function(evt){ var mousePos = mouse(evt); paddle1Y = mousePos.y - PADDLE_HEIGHT/2;})
+}
+
+function main()
+{
+movement();
+drawEverythig();
+
+}
+
+function computerMovement()
+{
+var paddle2YCenter = paddle2Y + (PADDLE_HEIGHT/2);
+if(paddle2YCenter < bally - 35)
+{
+paddle2Y += 6;
+}
+else if(paddle2YCenter > bally + 35)
+{
+paddle2Y -= 6;
+}
+
+}
+
+
+
+function movement()
+{
+computerMovement();
+
+
+
+ballx = ballx + ballSpeedX;
+bally = bally + ballSpeedY;
+
+if(ballx > canvas.width)
+{
+if(bally > paddle2Y && bally < paddle2Y+PADDLE_HEIGHT)
+{
+ballSpeedX = -ballSpeedX;
+
+var deltaY = bally - (paddle2Y+PADDLE_HEIGHT/2);
+ballSpeedY = deltaY*0.35;
+}
+else
+{
+Pscore1++
+ballReset();
+}
+}
+
+if(ballx < 0)
+{
+if(bally > paddle1Y && bally < paddle1Y+PADDLE_HEIGHT)
+{
+ballSpeedX = -ballSpeedX;
+
+var deltaY = bally - (paddle1Y+PADDLE_HEIGHT/2);
+ballSpeedY = deltaY*0.35;
+}
+else
+{
+Pscore2++;
+ballReset();
+}
+}
+
+if(bally > canvas.height)
+{
+ballSpeedY = -ballSpeedY;
+}
+
+if(bally < 0)
+{
+ballSpeedY = -ballSpeedY;
+}
+
+}
+
+function drawEverythig()
+{
+
+if(winScreen)
+{
+
+if(Pscore1 >= WIN_CONDITION)
+{
+canvasContext.fillStyle = "red";
+canvasContext.fillText("Player 1 wins", canvas.width/2,(canvas.height/2)-50)
+canvasContext.fillText("CLICK TO CONTINUE", canvas.width/2,canvas.height/2)
+}
+else
+{
+canvasContext.fillStyle = "red";
+canvasContext.fillText("Player 2 wins", canvas.width/2,(canvas.height/2)-50)
+canvasContext.fillText("CLICK TO CONTINUE", canvas.width/2,canvas.height/2)
+}
+
+
+return;
+
+}
+//canvasContext.fillStyle = "black";
+//canvasContext.fillRect(0,0,canvas.width,canvas.height);
+//canvasContext.fillStyle = "red";
+//canvasContext.fillRect(ballx,100,10,10);
+//canvasContext.fillStyle = "white";
+//canvasContext.fillRect(0,200,20,200);
+
+Elements(0,0,canvas.width,canvas.height,"black");
+//Elements(ballx,100,10,10,"red");
+Elements(0,paddle1Y,PADDLE_THIKNESS,PADDLE_HEIGHT,"white");
+Elements(canvas.width-PADDLE_THIKNESS,paddle2Y,PADDLE_THIKNESS,PADDLE_HEIGHT,"white");
+drawNet();
+ball(ballx,bally,10,"red");
+
+canvasContext.fillText(Pscore1,100,100);
+canvasContext.fillText(Pscore2,canvas.width-100,100);
+
+}
+
+function ball(centerX, centerY, radius, color)
+{
+
+canvasContext.fillStyle = color;
+canvasContext.beginPath();
+// c(x,y),radius,from(0-2pi),direction(counter clock)
+canvasContext.arc(centerX, centerY, radius, 0, Math.PI*2, true);
+canvasContext.fill();
+}
+
+function drawNet()
+{
+for(var i=0; i<canvas.height; i+=40)
+{
+Elements(canvas.width/2, i, 2, 20, "white");
+
+}
+
+
+}
+
+function Elements(x, y, width, height, color)
+{
+
+canvasContext.fillStyle = color;
+canvasContext.fillRect(x,y,width,height);
+
+}
+
+
+</script>
+
+</html>
